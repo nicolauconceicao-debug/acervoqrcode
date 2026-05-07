@@ -5,22 +5,42 @@
     <title>AR Interativo - Museu da Pessoa</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+
+    <script>
+        AFRAME.registerComponent('handler-clique', {
+            init: function () {
+                let el = this.el;
+                el.addEventListener('click', function () {
+                    console.log("Card clicado!"); // Para debug
+                    window.location.href = 'Mapas_HTML/HD_0001.html';
+                });
+            }
+        });
+    </script>
 </head>
 
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;" cursor="rayOrigin: mouse">
+<body style="margin: 0px; overflow: hidden;">
+    
+    <a-scene 
+        embedded 
+        arjs="sourceType: webcam; debugUIEnabled: false;" 
+        cursor="rayOrigin: mouse" 
+        raycaster="objects: .clickable">
         
         <a-marker preset="hiro">
             
             <a-plane 
                 id="card-hd"
-                position="0 1 0" 
+                class="clickable"
+                handler-clique
+                position="0 0.5 0" 
                 rotation="-90 0 0" 
                 width="2.5" 
                 height="1.5" 
                 color="#0055ff" 
-                opacity="0.9"
-                class="clickable"
-                handler-clique> <a-text value="HD_0001\nACERVO DIGITAL" align="center" position="0 0.4 0.1" width="5" color="#FFFFFF"></a-text>
+                opacity="0.9">
+                
+                <a-text value="HD_0001\nACERVO DIGITAL" align="center" position="0 0.4 0.1" width="5" color="#FFFFFF"></a-text>
                 
                 <a-plane position="0 0.1 0.1" width="2" height="0.02" color="#FFFFFF"></a-plane>
 
@@ -33,17 +53,5 @@
         <a-entity camera></a-entity>
 
     </a-scene>
-
-    <script>
-        // Lógica para o redirecionamento ao tocar no card
-        AFRAME.registerComponent('handler-clique', {
-            init: function () {
-                this.el.addEventListener('click', function () {
-                    // Altere o link abaixo para o caminho real do seu mapa
-                    window.location.href = 'Mapas_HTML/HD_0001.html';
-                });
-            }
-        });
-    </script>
 </body>
 </html>
