@@ -32,28 +32,157 @@
 </head>
 
 <body>
+    <!-- Interface de Instrução (UI) -->
+    <div id="instruction-guide">
+        <p>Aponte a câmera para um código do acervo</p>
+    </div>
+
     <a-scene 
         embedded 
-        arjs="sourceType: webcam; debugUIEnabled: false;" 
+        arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix;" 
         cursor="rayOrigin: mouse" 
         raycaster="objects: .clickable">
+        
+        <!-- Assets para melhor performance -->
+    <a-assets>
+        <!-- Adicionando alt e title para conformidade com acessibilidade -->
+        <img id="icon-open" 
+            src="fundo_qr.jpeg" 
+            alt="Ícone de abrir link" 
+            title="Abrir conteúdo do acervo">
+    </a-assets>
 
-        <a-marker type="pattern" url="marcadores/pattern_HD_0001.patt">
-            <a-plane class="clickable" hd-handler="hdId: HD_0001" position="0 0.5 0" rotation="-90 0 0" width="2.5" height="1.5" color="#0055ff" opacity="0.9">
-                <a-text value="HD_0001\nTOQUE PARA ABRIR" align="center" position="0 0 0.1" width="4"></a-text>
-            </a-plane>
+        <!-- Template de Marcador (Repita para 0002, 0003...) -->
+        <a-marker type="pattern" url="marcadores/HD_0001.patt">
+            <a-entity 
+                class="clickable" 
+                hdId: HD_0001
+                position="0 0 0" 
+                rotation="-90 0 0"
+                animation__entry="property: scale; from: 0 0 0; to: 1 1 1; dur: 500; easing: easeOutElastic">
+                
+                <!-- Card Principal -->
+                <a-plane width="2.8" height="1.6" color="#1a1a1a" opacity="0.85" radius="0.1">
+                    <!-- Borda Decorativa Superior -->
+                    <a-plane position="0 0.75 0.01" width="2.8" height="0.1" color="#ffcc00"></a-plane>
+                    
+                    <!-- Texto do ID -->
+                    <a-text 
+                        value="ACERVO DIGITAL" 
+                        position="-1.2 0.4 0.02" 
+                        width="3" 
+                        color="#ffcc00" 
+                        font="https://cdn.aframe.io/fonts/Exo2Bold.fnt">
+                    </a-text>
+                    
+                    <a-text 
+                        value="HD_0001" 
+                        position="-1.2 0.1 0.02" 
+                        width="6" 
+                        color="#ffffff" 
+                        font="https://cdn.aframe.io/fonts/Exo2Bold.fnt">
+                    </a-text>
+
+                    <!-- Botão/Chamada de Ação -->
+                    <a-entity position="0 -0.4 0.02">
+                        <a-plane width="2.4" height="0.4" color="#ffcc00" class="btn-hover">
+                            <a-text value="TOQUE PARA EXPLORAR HISTÓRIA" align="center" color="#000" width="3.5"></a-text>
+                        </a-plane>
+                    </a-entity>
+                </a-entity>
+
+                <!-- Efeito de Flutuação -->
+                <a-entity animation="property: position; from: 0 0.5 0; to: 0 0.7 0; dir: alternate; dur: 1500; loop: true; easing: easeInOutSine">
+                </a-entity>
+            </a-entity>
         </a-marker>
-
+        
         <a-marker type="pattern" url="marcadores/pattern_HD_0002.patt">
-            <a-plane class="clickable" hd-handler="hdId: HD_0002" position="0 0.5 0" rotation="-90 0 0" width="2.5" height="1.5" color="#0055ff" opacity="0.9">
-                <a-text value="HD_0002\nTOQUE PARA ABRIR" align="center" position="0 0 0.1" width="4"></a-text>
-            </a-plane>
+            <a-entity 
+                class="clickable" 
+                hdId: HD_0002
+                position="0 0 0" 
+                rotation="-90 0 0"
+                animation__entry="property: scale; from: 0 0 0; to: 1 1 1; dur: 500; easing: easeOutElastic">
+                
+                <!-- Card Principal -->
+                <a-plane width="2.8" height="1.6" color="#1a1a1a" opacity="0.85" radius="0.1">
+                    <!-- Borda Decorativa Superior -->
+                    <a-plane position="0 0.75 0.01" width="2.8" height="0.1" color="#ffcc00"></a-plane>
+                    
+                    <!-- Texto do ID -->
+                    <a-text 
+                        value="ACERVO DIGITAL" 
+                        position="-1.2 0.4 0.02" 
+                        width="3" 
+                        color="#ffcc00" 
+                        font="https://cdn.aframe.io/fonts/Exo2Bold.fnt">
+                    </a-text>
+                    
+                    <a-text 
+                        value="HD_0002" 
+                        position="-1.2 0.1 0.02" 
+                        width="6" 
+                        color="#ffffff" 
+                        font="https://cdn.aframe.io/fonts/Exo2Bold.fnt">
+                    </a-text>
+
+                    <!-- Botão/Chamada de Ação -->
+                    <a-entity position="0 -0.4 0.02">
+                        <a-plane width="2.4" height="0.4" color="#ffcc00" class="btn-hover">
+                            <a-text value="TOQUE PARA EXPLORAR HISTÓRIA" align="center" color="#000" width="3.5"></a-text>
+                        </a-plane>
+                    </a-entity>
+                </a-entity>
+
+                <!-- Efeito de Flutuação -->
+                <a-entity animation="property: position; from: 0 0.5 0; to: 0 0.7 0; dir: alternate; dur: 1500; loop: true; easing: easeInOutSine">
+                </a-entity>
+            </a-entity>
         </a-marker>
 
         <a-marker type="pattern" url="marcadores/pattern_HD_0003.patt">
-            <a-plane class="clickable" hd-handler="hdId: HD_0003" position="0 0.5 0" rotation="-90 0 0" width="2.5" height="1.5" color="#0055ff" opacity="0.9">
-                <a-text value="HD_0003\nTOQUE PARA ABRIR" align="center" position="0 0 0.1" width="4"></a-text>
-            </a-plane>
+            <a-entity 
+                class="clickable" 
+                hdId: HD_0003
+                position="0 0 0" 
+                rotation="-90 0 0"
+                animation__entry="property: scale; from: 0 0 0; to: 1 1 1; dur: 500; easing: easeOutElastic">
+                
+                <!-- Card Principal -->
+                <a-plane width="2.8" height="1.6" color="#1a1a1a" opacity="0.85" radius="0.1">
+                    <!-- Borda Decorativa Superior -->
+                    <a-plane position="0 0.75 0.01" width="2.8" height="0.1" color="#ffcc00"></a-plane>
+                    
+                    <!-- Texto do ID -->
+                    <a-text 
+                        value="ACERVO DIGITAL" 
+                        position="-1.2 0.4 0.02" 
+                        width="3" 
+                        color="#ffcc00" 
+                        font="https://cdn.aframe.io/fonts/Exo2Bold.fnt">
+                    </a-text>
+                    
+                    <a-text 
+                        value="HD_0003" 
+                        position="-1.2 0.1 0.02" 
+                        width="6" 
+                        color="#ffffff" 
+                        font="https://cdn.aframe.io/fonts/Exo2Bold.fnt">
+                    </a-text>
+
+                    <!-- Botão/Chamada de Ação -->
+                    <a-entity position="0 -0.4 0.02">
+                        <a-plane width="2.4" height="0.4" color="#ffcc00" class="btn-hover">
+                            <a-text value="TOQUE PARA EXPLORAR HISTÓRIA" align="center" color="#000" width="3.5"></a-text>
+                        </a-plane>
+                    </a-entity>
+                </a-entity>
+
+                <!-- Efeito de Flutuação -->
+                <a-entity animation="property: position; from: 0 0.5 0; to: 0 0.7 0; dir: alternate; dur: 1500; loop: true; easing: easeInOutSine">
+                </a-entity>
+            </a-entity>
         </a-marker>
 
         <a-entity camera></a-entity>
