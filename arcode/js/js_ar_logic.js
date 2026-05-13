@@ -1,5 +1,3 @@
-// js/ar_logic.js
-
 AFRAME.registerComponent('ar-card-logic', {
     schema: { 
         hdId: { type: 'string' },
@@ -10,38 +8,46 @@ AFRAME.registerComponent('ar-card-logic', {
         const el = this.el;
         const hdId = this.data.hdId;
 
-        // 1. Carregar dados do JSON Externo
+        // O fetch usará o ../ corretamente pois parte da URL do navegador
         fetch(this.data.jsonPath)
-            .then(response => response.json())
-            .then(data => {
-                this.updateCardData(el, data, hdId);
+            .then(response => {
+                if (!response.ok) throw new Error("Erro 404: Arquivo não encontrado no caminho " + this.data.jsonPath);
+                return response.json();
             })
-            .catch(err => console.error("Erro ao carregar JSON:", err));
+            .then(data => {
+                const projetoNome = Object.keys(data)[0]; 
+                const info = data[projetoNome];
 
-        // 2. Lógica de Clique com Proteção
+                const labelNome = el.querySelector('.lbl-nome');
+                const labelExtra = el.querySelector('.lbl-extra');
+
+                if (labelNome) {
+                    labelNome.setAttribute('value', projetoNome.substring(0, 25));
+                }
+                
+                if (labelExtra) {
+                    // Verificando se existe a pasta HV para contar entrevistas, como no seu JSON
+                    let count = info.HV ? Object.keys(info.HV).length : 0;
+                    labelExtra.setAttribute('value', `ID: ${hdId} | ${count} Entrevistas`);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                // Feedback visual de erro no card para você saber que o caminho falhou
+                el.querySelector('.lbl-nome').setAttribute('value', "Erro no JSON");
+            });
+
+        // Lógica de Clique
         let clickEnabled = false;
         setTimeout(() => { clickEnabled = true; }, 1500);
 
-        const onAction = (e) => {
+        const onAction = () => {
             if (!clickEnabled) return;
-            // Redireciona para a página do mapa
+            // O caminho Mapas_HTML/ está dentro de arcode, então não precisa de ../
             window.location.href = `Mapas_HTML/${hdId}.html`;
         };
 
         el.addEventListener('click', onAction);
         el.addEventListener('touchstart', onAction);
-    },
-
-    updateCardData: function (el, data, hdId) {
-        // Exemplo: Pegando o primeiro projeto do seu JSON
-        const projetoNome = Object.keys(data)[0]; 
-        const info = data[projetoNome];
-
-        // Atualiza os textos no A-Frame
-        const labelNome = el.querySelector('.lbl-nome');
-        const labelExtra = el.querySelector('.lbl-extra');
-
-        if (labelNome) labelNome.setAttribute('value', projetoNome.substring(0, 30) + "...");
-        if (labelExtra) labelExtra.setAttribute('value', `ID: ${hdId} | Metadados OK`);
     }
 });
