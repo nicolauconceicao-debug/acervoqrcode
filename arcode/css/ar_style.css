@@ -1,0 +1,32 @@
+/* css/ar_style.css */
+body {
+    margin: 0;
+    overflow: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.ar-overlay {
+    position: fixed;
+    top: 20px;
+    width: 100%;
+    text-align: center;
+    z-index: 10;
+    pointer-events: none; /* Permite clicar no AR através do texto */
+}
+
+.ar-title {
+    color: #ffcc00;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.ar-instruction {
+    color: white;
+    background: rgba(0,0,0,0.5);
+    display: inline-block;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.9em;
+}
