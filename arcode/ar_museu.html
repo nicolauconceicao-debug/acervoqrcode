@@ -2,39 +2,57 @@
 <html lang="pt-br">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-    <title>Museu da Pessoa</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Scanner Acervo - Museu da Pessoa</title>
     
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    
-    <link rel="stylesheet" href="css/ar_style.css">
-    <script src="js/js_ar_logic.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <link rel="stylesheet" href="css/scanner_style.css">
 </head>
+<body>
 
-<body style="margin: 0; overflow: hidden;">
-    <div class="ar-overlay">
-        <h2 class="ar-title">Acervo Digital</h2>
-        <span class="ar-instruction" id="status-text">Buscando marcador...</span>
+    <div id="reader"></div>
+
+    <div class="camera-guidelines">
+        <div class="scanner-box"></div>
+        <p class="status-msg">Aponte para o QR Code do HD</p>
     </div>
 
-    <div id="bottom-card" class="bottom-sheet hidden">
-        <div class="sheet-content">
-            <h3 id="info-nome">Carregando dados...</h3>
-            <p id="info-extra">ID: ...</p>
-            <button id="btn-explorar">ABRIR</button>
+    <div id="info-sheet" class="sheet">
+        <div class="sheet-header">
+            <div class="drag-handle"></div>
+            <button id="close-btn">✕</button>
+        </div>
+        
+        <div class="sheet-body">
+            <div class="header-info">
+                <span class="badge">HD ENCONTRADO</span>
+                <h1 id="hd-title">Carregando...</h1>
+                <p id="hd-id-tag">ID: --</p>
+            </div>
+
+            <div class="json-details">
+                <div class="info-row">
+                    <span>Projeto:</span>
+                    <strong id="val-projeto">...</strong>
+                </div>
+                <div class="info-row">
+                    <span>Status:</span>
+                    <strong id="val-status" style="color: #00ff00;">Online</strong>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="secondary-btn" id="add-to-basket">
+                    <span>⭐</span> Salvar na Cesta
+                </button>
+                
+                <button class="primary-btn" id="go-to-map">
+                    EXPLORAR MAPA <span>→</span>
+                </button>
+            </div>
         </div>
     </div>
 
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false; displayWidth: 1280; displayHeight: 720; canvasWidth: 1280; canvasHeight: 720;" vr-mode-ui="enabled: false">
-        
-        <a-marker type="pattern" url="marcadores/HD_0001.patt" marker-handler="hdId: HD_0001; jsonPath: base_dados/HD_0001/HD_0001_step3.json">
-            <a-ring position="0 0.1 0" rotation="-90 0 0" radius-inner="0.4" radius-outer="0.5" color="#ffcc00" 
-                    animation="property: scale; from: 1 1 1; to: 1.2 1.2 1; dir: alternate; dur: 800; loop: true">
-            </a-ring>
-        </a-marker>
-
-        <a-entity camera></a-entity>
-    </a-scene>
+    <script src="js/scanner_logic.js"></script>
 </body>
 </html>
