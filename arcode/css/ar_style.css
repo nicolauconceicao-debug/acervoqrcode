@@ -30,3 +30,17 @@ body {
     border-radius: 20px;
     font-size: 0.9em;
 }
+
+/* Garante que o vídeo da câmera não seja esticado de forma bizarra */
+video {
+    width: 100vw !important;
+    height: 100vh !important;
+    margin-left: 0 !important;
+    top: 0 !important;
+    object-fit: cover !important;
+}
+
+.a-canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
