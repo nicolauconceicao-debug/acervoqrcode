@@ -1,53 +1,56 @@
-AFRAME.registerComponent('ar-card-logic', {
+AFRAME.registerComponent('marker-handler', {
     schema: { 
         hdId: { type: 'string' },
         jsonPath: { type: 'string' } 
     },
     
     init: function () {
-        const el = this.el;
+        const marker = this.el;
         const hdId = this.data.hdId;
+        const jsonPath = this.data.jsonPath;
+        
+        const bottomCard = document.querySelector('#bottom-card');
+        const statusText = document.querySelector('#status-text');
+        const btnExplorar = document.querySelector('#btn-explorar');
 
-        // Faz a requisição saindo da pasta arcode através do caminho definido no HTML
-        fetch(this.data.jsonPath)
-            .then(response => {
-                if (!response.ok) throw new Error("Erro ao carregar o arquivo JSON");
-                return response.json();
-            })
-            .then(data => {
-                // Obtém o nome do projeto (ex: "ABC de Luta - Preservação...")
-                const projetoNome = Object.keys(data)[0]; 
-                
-                const labelNome = el.querySelector('.lbl-nome');
-                const labelExtra = el.querySelector('.lbl-extra');
+        let dadosCarregados = false;
 
-                if (labelNome && projetoNome) {
-                    // Limita o tamanho do texto para caber no card 3D
-                    labelNome.setAttribute('value', projetoNome.substring(0, 25) + "...");
-                }
-                
-                if (labelExtra) {
-                    labelExtra.setAttribute('value', `ID: ${hdId.toUpperCase()} | ONLINE`);
-                }
-            })
-            .catch(err => {
-                console.error("Erro no fetch:", err);
-                const labelNome = el.querySelector('.lbl-nome');
-                if (labelNome) labelNome.setAttribute('value', "Erro ao ler dados");
-            });
+        // Quando a câmera encontra o marcador
+        marker.addEventListener('markerFound', () => {
+            statusText.innerText = "HD Encontrado!";
+            bottomCard.classList.add('visible'); // Faz o card deslizar para cima
 
-        // Proteção contra cliques automáticos
-        let clickEnabled = false;
-        setTimeout(() => { clickEnabled = true; }, 1500);
+            // Se os dados ainda não foram baixados, baixa agora
+            if (!dadosCarregados) {
+                fetch(jsonPath)
+                    .then(res => {
+                        if(!res.ok) throw new Error("Caminho do JSON incorreto");
+                        return res.json();
+                    })
+                    .then(data => {
+                        const projetoNome = Object.keys(data)[0];
+                        document.querySelector('#info-nome').innerText = projetoNome;
+                        document.querySelector('#info-extra').innerText = `ID: ${hdId.toUpperCase()} | ONLINE`;
+                        dadosCarregados = true;
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        document.querySelector('#info-nome').innerText = "Erro ao ler os dados do acervo";
+                    });
+            }
 
-        const onAction = (e) => {
-            if (!clickEnabled) return;
-            if (e) e.preventDefault();
-            // Redireciona mantendo-se dentro da estrutura da pasta arcode
-            window.location.href = `Mapas_HTML/${hdId}.html`;
-        };
+            // Configura o link do botão (Corrige o erro de "página não encontrada")
+            btnExplorar.onclick = () => {
+                // Aqui você ajusta o caminho exato onde estão os seus mapas
+                // Se a pasta Mapas_HTML estiver na mesma pasta que ar_museu.html:
+                window.location.href = `Mapas_HTML/${hdId}.html`; 
+            };
+        });
 
-        el.addEventListener('click', onAction);
-        el.addEventListener('touchstart', onAction, { passive: false });
+        // Quando a câmera perde o marcador
+        marker.addEventListener('markerLost', () => {
+            statusText.innerText = "Aponte para o marcador do HD";
+            bottomCard.classList.remove('visible'); // Esconde o card
+        });
     }
 });
