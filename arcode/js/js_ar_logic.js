@@ -43,7 +43,7 @@ AFRAME.registerComponent('marker-handler', {
             btnExplorar.onclick = () => {
                 // Aqui você ajusta o caminho exato onde estão os seus mapas
                 // Se a pasta Mapas_HTML estiver na mesma pasta que ar_museu.html:
-                window.location.href = `Mapas_HTML/${hdId}.html`; 
+                window.location.href = `mapas_html/${hdId}.html`; 
             };
         });
 
