@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SGA - Museu da Pessoa</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    
+    <script>
+        AFRAME.registerComponent('hd-handler', {
+            schema: { hdId: {type: 'string'} },
+            init: function () {
+                // Função de redirecionamento isolada
+                const redirecionar = () => {
+                    window.location.href = `Mapas_HTML/${this.data.hdId}.html`;
+                };
+
+                // Adicionamos 'touchstart' (Toque na tela do celular) e 'click' (Mouse no PC)
+                this.el.addEventListener('click', redirecionar);
+                this.el.addEventListener('touchstart', redirecionar);
+            }
+        });
+    </script>
+</head>
+
+<body style="margin: 0; overflow: hidden;">
+    <a-scene 
+        embedded 
+        arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix;" 
+        cursor="rayOrigin: mouse" 
+        raycaster="objects: .clickable">
+
+        <!-- ADICIONADO: smooth="true" e configurações para estabilizar a tremedeira -->
+        <a-marker 
+            type="pattern" 
+            url="Marcadores/pattern_HD_0001.patt"
+            smooth="true" 
+            smoothCount="10" 
+            smoothTolerance="0.01" 
+            smoothThreshold="5">
+            
+            <a-entity 
+                position="0 0.2 0" 
+                rotation="-90 0 0">
+                
+                <!-- O Card Principal (Clicável) -->
+                <a-plane 
+                    class="clickable" 
+                    hd-handler="hdId: HD_0001"
+                    width="2.8" height="1.6" 
+                    material="color: #1a1a1a; opacity: 0.95;">
+                    
+                    <!-- Z-FIGHTING CORRIGIDO: Aumentamos o valor do Z (terceiro número do position) -->
+                    <a-plane position="0 0.75 0.05" width="2.8" height="0.1" color="#ffcc00"></a-plane>
+                    
+                    <a-text value="ACERVO DIGITAL" position="-1.2 0.4 0.05" width="3" color="#ffcc00"></a-text>
+                    <a-text value="HD_0001" position="-1.2 0.1 0.05" width="6" color="#ffffff"></a-text>
+                    
+                    <!-- Botão Amarelo -->
+                    <a-plane position="0 -0.4 0.05" width="2.4" height="0.4" color="#ffcc00">
+                        <!-- O texto do botão também precisa de profundidade para não misturar com o amarelo -->
+                        <a-text value="TOQUE PARA EXPLORAR" align="center" position="0 0 0.02" color="#000" width="3.5"></a-text>
+                    </a-plane>
+                </a-plane>
+
+            </a-entity>
+        </a-marker>
+
+        <a-entity camera></a-entity>
+    </a-scene>
+</body>
+</html>
