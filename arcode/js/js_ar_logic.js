@@ -1,56 +1,48 @@
-AFRAME.registerComponent('marker-handler', {
-    schema: { 
-        hdId: { type: 'string' },
-        jsonPath: { type: 'string' } 
-    },
-    
-    init: function () {
-        const marker = this.el;
-        const hdId = this.data.hdId;
-        const jsonPath = this.data.jsonPath;
-        
-        const bottomCard = document.querySelector('#bottom-card');
-        const statusText = document.querySelector('#status-text');
-        const btnExplorar = document.querySelector('#btn-explorar');
+let currentHD = null;
 
-        let dadosCarregados = false;
+// Inicializa o Scanner
+const scanner = new Html5QrcodeScanner("reader", { fps: 20, qrbox: 250 });
 
-        // Quando a câmera encontra o marcador
-        marker.addEventListener('markerFound', () => {
-            statusText.innerText = "HD Encontrado!";
-            bottomCard.classList.add('visible'); // Faz o card deslizar para cima
-
-            // Se os dados ainda não foram baixados, baixa agora
-            if (!dadosCarregados) {
-                fetch(jsonPath)
-                    .then(res => {
-                        if(!res.ok) throw new Error("Caminho do JSON incorreto");
-                        return res.json();
-                    })
-                    .then(data => {
-                        const projetoNome = Object.keys(data)[0];
-                        document.querySelector('#info-nome').innerText = projetoNome;
-                        document.querySelector('#info-extra').innerText = `ID: ${hdId.toUpperCase()} | ONLINE`;
-                        dadosCarregados = true;
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        document.querySelector('#info-nome').innerText = "Erro ao ler os dados do acervo";
-                    });
-            }
-
-            // Configura o link do botão (Corrige o erro de "página não encontrada")
-            btnExplorar.onclick = () => {
-                // Aqui você ajusta o caminho exato onde estão os seus mapas
-                // Se a pasta Mapas_HTML estiver na mesma pasta que ar_museu.html:
-                window.location.href = `mapas_html/${hdId}.html`; 
-            };
-        });
-
-        // Quando a câmera perde o marcador
-        marker.addEventListener('markerLost', () => {
-            statusText.innerText = "Aponte para o marcador do HD";
-            bottomCard.classList.remove('visible'); // Esconde o card
-        });
+scanner.render((decodedText) => {
+    // decodedText deve ser o ID do HD, ex: "hd_0001"
+    if (currentHD !== decodedText) {
+        currentHD = decodedText;
+        abrirPainel(decodedText);
     }
 });
+
+function abrirPainel(id) {
+    const sheet = document.getElementById('info-sheet');
+    document.getElementById('hd-id-tag').innerText = "ID: " + id.toUpperCase();
+
+    // Busca dados no seu JSON
+    fetch(`base_dados/${id}/${id}_step3.json`)
+        .then(res => res.json())
+        .then(data => {
+            const projetoNome = Object.keys(data)[0];
+            document.getElementById('hd-title').innerText = projetoNome;
+            document.getElementById('val-projeto').innerText = projetoNome.substring(0, 20) + "...";
+            sheet.classList.add('active');
+        });
+
+    // Botão Ver Mapa
+    document.getElementById('go-to-map').onclick = () => {
+        window.location.href = `Mapas_HTML/${id}.html`;
+    };
+
+    // Lógica da Cesta (Cesta de Memórias)
+    document.getElementById('add-to-basket').onclick = () => {
+        let cesta = JSON.parse(localStorage.getItem('cesta_pesquisa')) || [];
+        if (!cesta.includes(id)) {
+            cesta.push(id);
+            localStorage.setItem('cesta_pesquisa', JSON.stringify(cesta));
+            alert("HD Salvo na sua cesta de pesquisa!");
+        }
+    };
+}
+
+// Fechar Painel
+document.getElementById('close-btn').onclick = () => {
+    document.getElementById('info-sheet').classList.remove('active');
+    currentHD = null;
+};
