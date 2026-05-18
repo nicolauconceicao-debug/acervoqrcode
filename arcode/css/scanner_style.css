@@ -25,12 +25,6 @@ body, html {
     transition: all 0.3s ease;
 }
 
-/* Classe ativada pelo JS quando o código for lido */
-.scanner-box.detected {
-    opacity: 1;
-    transform: scale(1);
-}
-
 #reader video {
     width: 100% !important;
     height: 100% !important;
