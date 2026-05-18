@@ -64,9 +64,8 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
         // Configura dinamicamente a ação do Botão Ver Mapa
-        // Corrigido 'mapas_html' para minúsculo igual à foto da sua árvore de arquivos!
         document.getElementById('go-to-map').onclick = () => {
-            window.location.href = `mapas_html/${id}.html`; 
+            window.location.href = `mapas_hd/${id}.html`; 
         };
 
         // Gerenciamento da Cesta de Memórias (Pesquisa) via localStorage
@@ -135,7 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Configura dinamicamente a ação do Botão Ver Mapa
         document.getElementById('go-to-map').onclick = () => {
-            window.location.href = `mapas_HTML/${id}.html`;
+            window.location.href = `mapas_hd/${id}.html`;
         };
 
         // Gerenciamento da Cesta de Memórias (Pesquisa) via localStorage
