@@ -13,18 +13,27 @@ document.addEventListener("DOMContentLoaded", () => {
         aspectRatio: 1.777778 // Força a proporção 16:9 de tela cheia mobile
     };
 
-    // Callback disparado quando um código é lido com sucesso
+    // Dentro do seu onScanSuccess, quando ler o código com sucesso:
     const onScanSuccess = (decodedText) => {
-        // Trata o texto decodificado (limpa espaços e força minúsculo se necessário)
         const idLimpo = decodedText.trim().toLowerCase();
-
+    
+        // Liga a borda amarela na tela na hora
+        const reticulo = document.getElementById('reticulo-foco');
+        reticulo.classList.add('detected');
+    
         if (currentHD !== idLimpo) {
             currentHD = idLimpo;
             abrirPainel(idLimpo);
-            
-            // Pequeno feedback de vibração no celular para avisar que leu
             if (navigator.vibrate) navigator.vibrate(60);
         }
+    };
+    
+    // E no seu botão de fechar (close-btn), nós desligamos a borda:
+    document.getElementById('close-btn').onclick = () => {
+        document.getElementById('info-sheet').classList.remove('active');
+        // Desliga a borda amarela para o próximo scan
+        document.getElementById('reticulo-foco').classList.remove('detected');
+        setTimeout(() => { currentHD = null; }, 1000); 
     };
 
     // Inicia a câmera traseira do celular automaticamente
