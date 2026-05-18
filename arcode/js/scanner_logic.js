@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('val-projeto').innerText = "...";
 
         // Busca dados no seu JSON estruturado
-        fetch(`base_dados/${id}/${id}_step3.json`)
+        fetch(`base_dados_json/${id}/${id}_step3.json`)
             .then(res => {
                 if (!res.ok) throw new Error("Arquivo não encontrado");
                 return res.json();
@@ -80,7 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Configura dinamicamente a ação do Botão Ver Mapa
         document.getElementById('go-to-map').onclick = () => {
-            window.location.href = `Mapas_HTML/${id}.html`;
+            window.location.href = `mapas_HTML/${id}.html`;
         };
 
         // Gerenciamento da Cesta de Memórias (Pesquisa) via localStorage
