@@ -8,24 +8,45 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Configurações ideais para escaneamento móvel rápido
     const config = { 
-        fps: 20, 
+        fps: 15, 
         qrbox: { width: 250, height: 250 }, // Tamanho alinhado com a sua mira CSS
         aspectRatio: 1.777778 // Força a proporção 16:9 de tela cheia mobile
+        formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ] // Foca SÓ em QR Code
     };
 
-    // 1. Corrigido para manter em MAIÚSCULO (ex: HD_0001)
     const onScanSuccess = (decodedText) => {
-        // .toUpperCase() garante que bata com os nomes das pastas físicas (HD_0001)
         const idLimpo = decodedText.trim().toUpperCase();
+        
+        // Impede leituras duplas idênticas instantâneas
+        if (currentHD === idLimpo) return;
+        currentHD = idLimpo;
+
+        // PAUSA O SCANNER imediatamente para economizar processamento
+        if (html5QrCode.getState() === Html5QrcodeScannerState.SCANNING) {
+            html5QrCode.pause();
+        }
     
         // Liga a borda amarela na tela na hora
         const reticulo = document.getElementById('reticulo-foco');
         if (reticulo) reticulo.classList.add('detected');
     
-        if (currentHD !== idLimpo) {
-            currentHD = idLimpo;
-            abrirPainel(idLimpo);
-            if (navigator.vibrate) navigator.vibrate(60);
+        abrirPainel(idLimpo);
+        if (navigator.vibrate) navigator.vibrate(60);
+    };
+
+    // ... (sua função abrirPainel continua igual) ...
+
+    // Gerencia o fechamento do painel (Botão X)
+    document.getElementById('close-btn').onclick = () => {
+        document.getElementById('info-sheet').classList.remove('active');
+        document.getElementById('reticulo-foco').classList.remove('detected');
+        
+        // Limpa o HD IMEDIATAMENTE (sem setTimeout)
+        currentHD = null;
+
+        // ACORDA O SCANNER de volta com força total
+        if (html5QrCode.getState() === Html5QrcodeScannerState.PAUSED) {
+            html5QrCode.resume();
         }
     };
 
