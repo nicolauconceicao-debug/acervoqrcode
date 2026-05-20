@@ -1,27 +1,39 @@
-// Aguarda o HTML carregar completamente para evitar erros de elementos nulos
+// Aguarda o HTML carregar completamente
 document.addEventListener("DOMContentLoaded", () => {
     let currentHD = null;
-    let html5QrCode = new Html5Qrcode("reader");
+    let html5QrCode;
 
-    // Configurações ideais para escaneamento móvel rápido
+    try {
+        // Inicializa o leitor na div "reader"
+        html5QrCode = new Html5Qrcode("reader");
+    } catch (e) {
+        console.error("Erro ao inicializar Html5Qrcode:", e);
+        return;
+    }
+
+    // Configurações ideais e simplificadas para evitar quebras no celular
     const config = { 
-        fps: 15, 
+        fps: 10, // 10 FPS é ideal para celulares mais antigos não travarem
         qrbox: { width: 250, height: 250 }, 
-        aspectRatio: 1.777778, // <-- VÍRGULA CORRIGIDA AQUI
-        formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ] // Foca SÓ em QR Code
+        aspectRatio: 1.777778
     };
+
+    // Tenta aplicar o filtro de QR Code se a biblioteca suportar globalmente
+    if (typeof Html5QrcodeSupportedFormats !== 'undefined') {
+        config.formatsToSupport = [ Html5QrcodeSupportedFormats.QR_CODE ];
+    }
 
     // Callback de sucesso na leitura
     const onScanSuccess = (decodedText) => {
         const idLimpo = decodedText.trim().toUpperCase();
         
-        // Impede leituras duplas instantâneas do mesmo código
+        // Impede leituras duplicadas seguidas
         if (currentHD === idLimpo) return;
         currentHD = idLimpo;
 
-        // PAUSA O SCANNER imediatamente para economizar bateria e memória
-        if (html5QrCode.getState() === Html5QrcodeScannerState.SCANNING) {
-            html5QrCode.pause(true); // 'true' congela o último frame do vídeo na tela
+        // Pausa o scanner para economizar memória e congelar o frame
+        if (html5QrCode && html5QrCode.getState() === 2) { // 2 significa SCANNING
+            html5QrCode.pause(true);
         }
     
         // Liga a borda amarela na tela
@@ -32,22 +44,27 @@ document.addEventListener("DOMContentLoaded", () => {
         if (navigator.vibrate) navigator.vibrate(60);
     };
 
-    // Inicia a câmera traseira do celular
-    html5QrCode.start(
-        { facingMode: "environment" }, 
-        config, 
-        onScanSuccess
-    ).catch(err => {
-        console.error("Não foi possível iniciar a câmera:", err);
-        document.querySelector('.status-msg').innerText = "Erro: Permita o acesso à câmera.";
-    });
+    // Inicia a câmera traseira de forma segura
+    function ligarCamera() {
+        html5QrCode.start(
+            { facingMode: "environment" }, 
+            config, 
+            onScanSuccess
+        ).catch(err => {
+            console.error("Não foi possível iniciar a câmera:", err);
+            const statusMsg = document.querySelector('.status-msg');
+            if (statusMsg) statusMsg.innerText = "Erro: Recarregue a página e permita a câmera.";
+        });
+    }
+
+    // Executa a inicialização da câmera
+    ligarCamera();
 
     // Função interna para gerenciar o painel e buscar metadados
     function abrirPainel(id) {
         const sheet = document.getElementById('info-sheet');
         document.getElementById('hd-id-tag').innerText = "ID: " + id;
         
-        // Reseta os textos para o estado de carregamento
         document.getElementById('hd-title').innerText = "Carregando...";
         document.getElementById('val-projeto').innerText = "...";
 
@@ -60,11 +77,9 @@ document.addEventListener("DOMContentLoaded", () => {
             .then(data => {
                 const projetoNome = Object.keys(data)[0];
                 
-                // Exibe as informações recuperadas
                 document.getElementById('hd-title').innerText = projetoNome;
                 document.getElementById('val-projeto').innerText = projetoNome.length > 22 ? projetoNome.substring(0, 22) + "..." : projetoNome;
                 
-                // Abre o card
                 sheet.classList.add('active');
             })
             .catch(err => {
@@ -74,7 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 sheet.classList.add('active');
             });
 
-        // Ação do Botão Ver Mapa (Mantido como você ajustou: mapas_hd)
+        // Ação do Botão Ver Mapa
         document.getElementById('go-to-map').onclick = () => {
             window.location.href = `mapas_hd/${id}.html`; 
         };
@@ -98,11 +113,10 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('info-sheet').classList.remove('active');
         document.getElementById('reticulo-foco').classList.remove('detected');
         
-        // Limpa o HD para permitir ler o mesmo código logo em seguida, se quiser
         currentHD = null;
 
-        // ACORDA O SCANNER de volta instantaneamente
-        if (html5QrCode.getState() === Html5QrcodeScannerState.PAUSED) {
+        // Acorda o scanner de volta se ele estiver pausado
+        if (html5QrCode && html5QrCode.getState() === 3) { // 3 significa PAUSED
             html5QrCode.resume();
         }
     };
