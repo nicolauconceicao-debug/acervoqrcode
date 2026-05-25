@@ -84,14 +84,13 @@
             display: none !important;
         }
 
-
-/* Indicador visual superior para o usuário saber que dá pra arrastar para baixo */
+        /* Indicador visual superior para o usuário saber que dá pra arrastar para baixo */
         .drag-handle {
             width: 40px;
             height: 4px;
             background: #e0e4e8;
             border-radius: 2px;
-            margin: -15px auto 15px auto;
+            margin: -10px auto 20px auto;
         }
 
         /* Botão "X" para fechar no estilo minimalista */
@@ -107,11 +106,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: bold;
             cursor: pointer;
             transition: background 0.2s;
             user-select: none;
+            z-index: 25;
         }
 
         .close-button:active {
@@ -129,7 +129,7 @@
             box-sizing: border-box;
             background-color: var(--accent-yellow);
             color: #1a1d21;
-            padding: 22px; /* Área de toque aumentada */
+            padding: 22px; 
             text-align: center;
             font-weight: bold;
             font-size: 15px;
@@ -146,7 +146,7 @@
             transform: translate(-50%, 0);
         }
 
-        /* Painel de Pré-visualização inspirado no seu #metadata-panel */
+        /* O PREVIEW-MODAL UNIFICADO: Limpo, Branco e com Detalhe Azul */
         #preview-modal {
             position: fixed;
             bottom: 0;
@@ -155,54 +155,30 @@
             width: 100%;
             max-width: 500px;
             box-sizing: border-box;
-            background: var(--sidebar-bg);
-            padding: 30px 25px;
-            border-top-left-radius: 20px;
-            border-top-right-radius: 20px;
-            transition: transform 0.3s ease-out;
-            z-index: 20;
-            box-shadow: 0 -8px 30px #0056b3(0,0,0,0.15);
-        }
-
-        /* Painel de Pré-visualização */
-        #preview-modal {
-            position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translate(-50%, 100%);
-            width: 100%;
-            max-width: 500px;
-            box-sizing: border-box;
-            
-            /* MODIFICAÇÃO AQUI: Padrão Azul e Branco */
-            background: #ffffff; /* Fundo totalmente branco */
-            border-top: 3px solid var(--accent); /* Barrinha azul estilosa no topo */
-            
-            padding: 30px 25px;
-            border-top-left-radius: 20px;
-            border-top-right-radius: 20px;
-            transition: transform 0.3s cubic-bezier(0.1, 0.8, 0.2, 1);
-            z-index: 20;
-            box-shadow: 0 -8px 30px rgba(0,0,0,0.1);
-        }
-
-        #preview-modal {
-            position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translate(-50%, 100%);
-            width: 100%;
-            max-width: 500px;
-            box-sizing: border-box;
-            background: #ffffff; /* Fundo branco limpo */
-            border-top: 4px solid var(--accent); /* Detalhe azul no topo */
-            padding: 30px 25px 35px 25px;
+            background: #ffffff; 
+            border-top: 4px solid var(--accent); 
+            padding: 25px 25px 35px 25px;
             border-top-left-radius: 20px;
             border-top-right-radius: 20px;
             transition: transform 0.3s cubic-bezier(0.1, 0.8, 0.2, 1);
             z-index: 20;
             box-shadow: 0 -10px 40px rgba(0,0,0,0.15);
-            touch-action: none; /* Bloqueia scroll do sistema para priorizar o arrastar do painel */
+            touch-action: none; 
+        }
+
+        #preview-modal.open {
+            transform: translate(-50%, 0);
+        }
+
+        #preview-modal h3 {
+            margin-top: 0;
+            margin-bottom: 25px;
+            font-size: 14px;
+            color: var(--accent);
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--accent);
+            display: inline-block;
+            padding-bottom: 4px;
         }
 
         /* Rótulos e valores idênticos ao seu layout padrão */
@@ -224,7 +200,7 @@
             word-break: break-all;
         }
 
-        /* Botão Botão Explorar - Estilo coerente com o tema */
+        /* Botão Explorar - Estilo coerente com o tema */
         .btn-explore {
             display: block;
             width: 100%;
@@ -275,8 +251,10 @@
     <div id="overlay" onclick="closePreview()"></div>
 
     <div id="preview-modal">
-        <h3 id="modal-title">HD_0001</h3>
+        <div class="drag-handle"></div>
         <div class="close-button" onclick="closePreview()">×</div>
+        
+        <h3 id="modal-title">HD_0001</h3>
         
         <div>
             <span class="meta-label">Projetos no Acervo</span>
@@ -295,22 +273,17 @@
         let currentHdCode = "";
         const html5QrcodeScanner = new Html5Qrcode("reader");
 
-        // Função executada ao clicar no botão inicial grande
         function initScanner() {
-            // 1. Solicita e entra em Tela Cheia no Dispositivo Móvel
             const docElm = document.documentElement;
             if (docElm.requestFullscreen) { docElm.requestFullscreen(); }
-            else if (docElm.webkitRequestFullscreen) { docElm.webkitRequestFullscreen(); } // Safari / Chrome antigo iOS-Android
+            else if (docElm.webkitRequestFullscreen) { docElm.webkitRequestFullscreen(); } 
             else if (docElm.msRequestFullscreen) { docElm.msRequestFullscreen(); }
 
-            // 2. Remove a tela de bloqueio
             document.getElementById("start-screen").style.display = "none";
 
-            // 3. Inicializa a câmera apontando diretamente para a traseira ("environment")
             const config = { 
                 fps: 20, 
                 qrbox: function(width, height) {
-                    // Caixa de leitura proporcional e confortável
                     return { width: width * 0.75, height: height * 0.75 };
                 }
             };
@@ -359,11 +332,13 @@
 
         function openPreview() {
             document.getElementById("preview-modal").classList.add("open");
-            document.getElementById("overlay").style.style.display = "block";
+            document.getElementById("overlay").style.display = "block";
         }
 
         function closePreview() {
-            document.getElementById("preview-modal").classList.remove("open");
+            const modalEl = document.getElementById("preview-modal");
+            modalEl.classList.remove("open");
+            modalEl.style.transform = ""; // Reseta o transform do gesto de arrastar
             document.getElementById("yellow-bar").classList.remove("show");
             document.getElementById("overlay").style.display = "none";
             currentHdCode = ""; 
@@ -384,10 +359,9 @@
             currentY = e.touches[0].clientY;
             const diffY = currentY - startY;
 
-            // Se o usuário estiver arrastando para baixo, move visualmente o modal acompanhando o dedo
             if (diffY > 0) {
                 modal.style.transform = `translate(-50%, ${diffY}px)`;
-                modal.style.transition = "none"; // Remove transição para o movimento ficar responsivo ao toque
+                modal.style.transition = "none"; 
             }
         }, { passive: true });
 
@@ -395,14 +369,11 @@
             const diffY = currentY - startY;
             modal.style.transition = "transform 0.3s cubic-bezier(0.1, 0.8, 0.2, 1)";
 
-            // Se arrastou mais do que 100 pixels para baixo, fecha o painel
             if (diffY > 100) {
                 closePreview();
             } else {
-                // Caso contrário, volta o painel para a posição aberta inicial
                 modal.style.transform = "translate(-50%, 0)";
             }
-            // Reseta variáveis
             startY = 0;
             currentY = 0;
         });
