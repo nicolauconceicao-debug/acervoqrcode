@@ -2,24 +2,27 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Scanner de Acervo - HDs</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     
     <style>
-        :root {
-            --bg-color: #121214;
-            --card-bg: #1e1e24;
-            --accent-yellow: #FFCC00;
-            --text-color: #ffffff;
-            --text-muted: #a0a0b5;
+        /* Sincronizado com a paleta de cores do seu HD_0001.html */
+        :root { 
+            --bg: #f8f9fa; 
+            --sidebar-bg: #ffffff; 
+            --border: #e0e4e8; 
+            --accent: #007BFF; 
+            --text: #1a1d21; 
+            --text-muted: #888;
+            --accent-yellow: #ffcc00;
         }
 
         body {
             margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -28,52 +31,80 @@
             overflow: hidden;
         }
 
-        /* Container da Câmera */
+        /* Tela de Boas-Vindas / Gatilho de Inicialização Segura */
+        #start-screen {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .btn-start {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 18px 36px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+        }
+
+        /* Container da Câmera Ocupando a Tela Inteira */
         #scanner-container {
-            position: relative;
-            width: 100%;
-            max-width: 480px;
-            height: 70vh;
+            position: absolute;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
             background: #000;
-            border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
         }
 
         #reader {
             width: 100% !important;
             height: 100% !important;
-            object-fit: cover;
         }
 
-        /* Remove bordas e textos padrões feios da biblioteca */
-        #reader__dashboard, #reader__status_span {
-            display: none !important;
-        }
-        video {
+        /* Força o elemento de vídeo interno a preencher a tela inteira */
+        #reader video {
+            width: 100% !important;
+            height: 100% !important;
             object-fit: cover !important;
         }
 
-        /* Barra Amarela Inferior (Notificação de Detecção) */
+        /* Esconde interfaces nativas poluídas da biblioteca */
+        #reader__dashboard, #reader__status_span, img[alt="Camera menu icon"] {
+            display: none !important;
+        }
+
+        /* Barra Inferior Amarela Otimizada para Dedos */
         #yellow-bar {
             position: fixed;
             bottom: 0;
             left: 50%;
             transform: translate(-50%, 100%);
             width: 100%;
-            max-width: 480px;
+            max-width: 500px;
+            box-sizing: border-box;
             background-color: var(--accent-yellow);
-            color: #000;
-            padding: 18px;
+            color: #1a1d21;
+            padding: 22px; /* Área de toque aumentada */
             text-align: center;
             font-weight: bold;
-            font-size: 1.1rem;
-            letter-spacing: 1px;
+            font-size: 15px;
+            letter-spacing: 0.5px;
             cursor: pointer;
             border-top-left-radius: 16px;
             border-top-right-radius: 16px;
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
+            transition: transform 0.3s cubic-bezier(0.1, 0.8, 0.2, 1);
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.15);
             z-index: 10;
         }
 
@@ -81,76 +112,85 @@
             transform: translate(-50%, 0);
         }
 
-        /* Modal / Janela de Pré-visualização */
+        /* Painel de Pré-visualização inspirado no seu #metadata-panel */
         #preview-modal {
             position: fixed;
             bottom: 0;
             left: 50%;
             transform: translate(-50%, 100%);
             width: 100%;
-            max-width: 480px;
+            max-width: 500px;
             box-sizing: border-box;
-            background: var(--card-bg);
-            padding: 25px;
-            border-top-left-radius: 24px;
-            border-top-right-radius: 24px;
+            background: var(--sidebar-bg);
+            padding: 30px 25px;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
             transition: transform 0.3s ease-out;
             z-index: 20;
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.6);
+            box-shadow: 0 -8px 30px rgba(0,0,0,0.15);
         }
 
         #preview-modal.open {
             transform: translate(-50%, 0);
         }
 
-        #preview-modal h2 {
+        #preview-modal h3 {
+            border-bottom: 2px solid var(--accent);
+            display: inline-block;
+            padding-bottom: 4px;
             margin-top: 0;
-            color: var(--accent-yellow);
-            font-size: 1.5rem;
-        }
-
-        .meta-group {
-            margin-bottom: 15px;
-        }
-
-        .meta-label {
-            font-size: 0.8rem;
-            color: var(--text-muted);
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: var(--accent);
             text-transform: uppercase;
-            margin-bottom: 4px;
         }
 
-        .meta-value {
-            font-size: 1rem;
-            font-weight: 500;
+        /* Rótulos e valores idênticos ao seu layout padrão */
+        .meta-label { 
+            font-weight: bold; 
+            font-size: 10px; 
+            color: var(--text-muted); 
+            text-transform: uppercase; 
+            margin-top: 15px; 
+            display: block; 
+            letter-spacing: 0.5px;
         }
 
-        /* Botão Explorar */
+        .meta-value { 
+            font-size: 13px; 
+            margin-top: 4px; 
+            display: block; 
+            color: var(--text); 
+            word-break: break-all;
+        }
+
+        /* Botão Botão Explorar - Estilo coerente com o tema */
         .btn-explore {
             display: block;
             width: 100%;
-            background: var(--accent-yellow);
-            color: #000;
+            box-sizing: border-box;
+            background: var(--accent);
+            color: white;
             text-align: center;
-            padding: 14px;
-            border-none: none;
+            padding: 16px;
+            border: none;
             border-radius: 8px;
-            font-size: 1rem;
+            font-size: 14px;
             font-weight: bold;
             text-decoration: none;
-            margin-top: 20px;
-            transition: background 0.2s;
+            margin-top: 25px;
+            transition: background 0.2s ease;
         }
 
-        .btn-explore:hover {
-            background: #e6b800;
+        .btn-explore:active {
+            background: #0056b3;
         }
 
-        /* Overlay para fechar o modal */
+        /* Cortina escura de fundo */
         #overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.4);
             display: none;
             z-index: 15;
         }
@@ -158,103 +198,114 @@
 </head>
 <body>
 
+    <div id="start-screen">
+        <h2 style="font-size: 18px; margin-bottom: 8px;">Scanner de Acervo</h2>
+        <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 25px; max-width: 280px;">Clique abaixo para ativar a câmera em tela cheia e iniciar o reconhecimento.</p>
+        <button class="btn-start" onclick="initScanner()">ATIVAR SCANNER</button>
+    </div>
+
     <div id="scanner-container">
         <div id="reader"></div>
     </div>
 
     <div id="yellow-bar" onclick="openPreview()">
-        HD DETECTADO: <span id="hd-code-label">...</span> (Toque para ver detalhes)
+        HD DETECTADO: <span id="hd-code-label">...</span>
     </div>
 
     <div id="overlay" onclick="closePreview()"></div>
 
     <div id="preview-modal">
-        <h2 id="modal-title">HD_0001</h2>
+        <h3 id="modal-title">HD_0001</h3>
         
-        <div class="meta-group">
-            <div class="meta-label">Projetos Identificados</div>
-            <div id="modal-projects" class="meta-value">Carregando informações...</div>
+        <div>
+            <span class="meta-label">Projetos no Acervo</span>
+            <span id="modal-projects" class="meta-value">Carregando informações estruturadas...</span>
         </div>
 
-        <div class="meta-group">
-            <div class="meta-label">Status do Arquivo</div>
-            <div id="modal-status" class="meta-value">Pronto para navegação</div>
+        <div>
+            <span class="meta-label">Localização Logística</span>
+            <span id="modal-status" class="meta-value">Diretório Raiz Mapeado</span>
         </div>
 
-        <a id="explore-link" href="#" class="btn-explore">Explorar Acervo</a>
+        <a id="explore-link" href="#" class="btn-explore">EXPLORAR ACERVO</a>
     </div>
 
     <script>
         let currentHdCode = "";
         const html5QrcodeScanner = new Html5Qrcode("reader");
 
-        // Configurações do Scanner
-        const config = { 
-            fps: 15, 
-            qrbox: function(width, height) {
-                return { width: width * 0.7, height: height * 0.7 };
-            }
-        };
+        // Função executada ao clicar no botão inicial grande
+        function initScanner() {
+            // 1. Solicita e entra em Tela Cheia no Dispositivo Móvel
+            const docElm = document.documentElement;
+            if (docElm.requestFullscreen) { docElm.requestFullscreen(); }
+            else if (docElm.webkitRequestFullscreen) { docElm.webkitRequestFullscreen(); } // Safari / Chrome antigo iOS-Android
+            else if (docElm.msRequestFullscreen) { docElm.msRequestFullscreen(); }
 
-        // Inicia a câmera traseira automaticamente
-        html5QrcodeScanner.start(
-            { facingMode: "environment" }, 
-            config,
-            onQrCodeSuccess
-        ).catch(err => console.error("Erro ao iniciar câmera: ", err));
+            // 2. Remove a tela de bloqueio
+            document.getElementById("start-screen").style.display = "none";
 
-        // Função executada ao ler um QR Code
+            // 3. Inicializa a câmera apontando diretamente para a traseira ("environment")
+            const config = { 
+                fps: 20, 
+                qrbox: function(width, height) {
+                    // Caixa de leitura proporcional e confortável
+                    return { width: width * 0.75, height: height * 0.75 };
+                }
+            };
+
+            html5QrcodeScanner.start(
+                { facingMode: "environment" }, 
+                config,
+                onQrCodeSuccess
+            ).catch(err => {
+                alert("Erro ao acessar a câmera. Certifique-se de dar as permissões.");
+                console.error(err);
+            });
+        }
+
         function onQrCodeSuccess(decodedText) {
-            // Limpa espaços e garante formato esperado (Ex: "HD_0001")
             const detectedCode = decodedText.trim();
-            
-            // Evita disparar repetidamente se for o mesmo HD já detectado
             if (detectedCode === currentHdCode) return;
             
             currentHdCode = detectedCode;
             
-            // Exibe a barra amarela com o código
             document.getElementById("hd-code-label").innerText = currentHdCode;
             document.getElementById("yellow-bar").classList.add("show");
             
-            // Pré-carrega os dados do JSON em segundo plano
             fetchHdData(currentHdCode);
         }
 
-        // Busca os metadados do arquivo JSON correspondente
         function fetchHdData(hdCode) {
             const jsonFile = `${hdCode}_step3.json`;
             
             fetch(jsonFile)
                 .then(response => {
-                    if (!response.ok) throw new Error("JSON não encontrado");
+                    if (!response.ok) throw new Error();
                     return response.json();
                 })
                 .then(data => {
-                    // Extrai as chaves principais (os nomes dos projetos no seu JSON)
                     const projetos = Object.keys(data);
                     document.getElementById("modal-projects").innerText = projetos.join(", ");
                 })
-                .catch(err => {
-                    console.warn(err);
-                    document.getElementById("modal-projects").innerText = "Estrutura mapeada, metadados resumidos indisponíveis.";
+                .catch(() => {
+                    document.getElementById("modal-projects").innerText = "Dados estruturados do HD indisponíveis localmente.";
                 });
 
-            // Atualiza o link do botão Explorar dinamicamente
             document.getElementById("explore-link").href = `${hdCode}.html`;
             document.getElementById("modal-title").innerText = hdCode;
         }
 
         function openPreview() {
             document.getElementById("preview-modal").classList.add("open");
-            document.getElementById("overlay").style.display = "block";
+            document.getElementById("overlay").style.style.display = "block";
         }
 
         function closePreview() {
             document.getElementById("preview-modal").classList.remove("open");
             document.getElementById("yellow-bar").classList.remove("show");
             document.getElementById("overlay").style.display = "none";
-            currentHdCode = ""; // Reseta para permitir escanear novamente
+            currentHdCode = ""; 
         }
     </script>
 </body>
