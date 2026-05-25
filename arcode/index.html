@@ -13,35 +13,16 @@
     <div id="reader"></div>
 
     <div class="camera-guidelines">
-        <div class="scanner-box"></div>
-        <p class="status-msg"></p>
-    </div>
-
-    <div id="info-sheet" class="sheet">
-        <div class="sheet-header">
-            <div class="drag-handle"></div>
-            <button id="close-btn">✕</button>
+            <div class="scan-box">
+                <span class="corner top-left"></span>
+                <span class="corner top-right"></span>
+                <span class="corner bottom-left"></span>
+                <span class="corner bottom-right"></span>
+                
+                <div class="scan-line"></div>
+            </div>
+            <p class="status-msg">Aponte para o QR Code do HD</p>
         </div>
-        
-        <div class="sheet-body">
-            <div class="header-info">
-                <span class="badge">HD ENCONTRADO</span>
-                <h1 id="hd-title">Carregando...</h1>
-                <p id="hd-id-tag">ID: --</p>
-            </div>
-
-            <div class="json-details">
-                <div class="info-row">
-                    <span>Projeto:</span>
-                    <strong id="val-projeto">...</strong>
-                </div>
-                <div class="info-row">
-                    <span>Status:</span>
-                    <strong id="val-status" style="color: #00ff00;">Online</strong>
-                </div>
-            </div>
-
-            <div class="camera-guidelines">
                 <div id="reticulo-foco" class="scanner-box hidden"></div>
                 <p class="status-msg"></p>
             </div>
