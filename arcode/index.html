@@ -1,44 +1,261 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Scanner Acervo - Museu da Pessoa</title>
-    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scanner de Acervo - HDs</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
-    <link rel="stylesheet" href="css/scanner_style.css">
+    
+    <style>
+        :root {
+            --bg-color: #121214;
+            --card-bg: #1e1e24;
+            --accent-yellow: #FFCC00;
+            --text-color: #ffffff;
+            --text-muted: #a0a0b5;
+        }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Container da Câmera */
+        #scanner-container {
+            position: relative;
+            width: 100%;
+            max-width: 480px;
+            height: 70vh;
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        }
+
+        #reader {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover;
+        }
+
+        /* Remove bordas e textos padrões feios da biblioteca */
+        #reader__dashboard, #reader__status_span {
+            display: none !important;
+        }
+        video {
+            object-fit: cover !important;
+        }
+
+        /* Barra Amarela Inferior (Notificação de Detecção) */
+        #yellow-bar {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translate(-50%, 100%);
+            width: 100%;
+            max-width: 480px;
+            background-color: var(--accent-yellow);
+            color: #000;
+            padding: 18px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+
+        #yellow-bar.show {
+            transform: translate(-50%, 0);
+        }
+
+        /* Modal / Janela de Pré-visualização */
+        #preview-modal {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translate(-50%, 100%);
+            width: 100%;
+            max-width: 480px;
+            box-sizing: border-box;
+            background: var(--card-bg);
+            padding: 25px;
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+            transition: transform 0.3s ease-out;
+            z-index: 20;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.6);
+        }
+
+        #preview-modal.open {
+            transform: translate(-50%, 0);
+        }
+
+        #preview-modal h2 {
+            margin-top: 0;
+            color: var(--accent-yellow);
+            font-size: 1.5rem;
+        }
+
+        .meta-group {
+            margin-bottom: 15px;
+        }
+
+        .meta-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .meta-value {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        /* Botão Explorar */
+        .btn-explore {
+            display: block;
+            width: 100%;
+            background: var(--accent-yellow);
+            color: #000;
+            text-align: center;
+            padding: 14px;
+            border-none: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            text-decoration: none;
+            margin-top: 20px;
+            transition: background 0.2s;
+        }
+
+        .btn-explore:hover {
+            background: #e6b800;
+        }
+
+        /* Overlay para fechar o modal */
+        #overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            z-index: 15;
+        }
+    </style>
 </head>
 <body>
 
-    <div id="reader"></div>
-
-    <div class="camera-guidelines">
-            <div class="scan-box">
-                <span class="corner top-left"></span>
-                <span class="corner top-right"></span>
-                <span class="corner bottom-left"></span>
-                <span class="corner bottom-right"></span>
-                
-                <div class="scan-line"></div>
-            </div>
-            <p class="status-msg">Aponte para o QR Code do HD</p>
-        </div>
-                <div id="reticulo-foco" class="scanner-box hidden"></div>
-                <p class="status-msg"></p>
-            </div>
-
-            <div class="action-buttons">
-                <button class="secondary-btn" id="add-to-basket">
-                    <span>ᯓ★</span> Salvar na Cesta
-                </button>
-                
-                <button class="primary-btn" id="go-to-map">
-                    EXPLORAR MAPA <span>→</span>
-                </button>
-            </div>
-        </div>
+    <div id="scanner-container">
+        <div id="reader"></div>
     </div>
 
-    <script src="js/scanner_logic.js"></script>
+    <div id="yellow-bar" onclick="openPreview()">
+        HD DETECTADO: <span id="hd-code-label">...</span> (Toque para ver detalhes)
+    </div>
+
+    <div id="overlay" onclick="closePreview()"></div>
+
+    <div id="preview-modal">
+        <h2 id="modal-title">HD_0001</h2>
+        
+        <div class="meta-group">
+            <div class="meta-label">Projetos Identificados</div>
+            <div id="modal-projects" class="meta-value">Carregando informações...</div>
+        </div>
+
+        <div class="meta-group">
+            <div class="meta-label">Status do Arquivo</div>
+            <div id="modal-status" class="meta-value">Pronto para navegação</div>
+        </div>
+
+        <a id="explore-link" href="#" class="btn-explore">Explorar Acervo</a>
+    </div>
+
+    <script>
+        let currentHdCode = "";
+        const html5QrcodeScanner = new Html5Qrcode("reader");
+
+        // Configurações do Scanner
+        const config = { 
+            fps: 15, 
+            qrbox: function(width, height) {
+                return { width: width * 0.7, height: height * 0.7 };
+            }
+        };
+
+        // Inicia a câmera traseira automaticamente
+        html5QrcodeScanner.start(
+            { facingMode: "environment" }, 
+            config,
+            onQrCodeSuccess
+        ).catch(err => console.error("Erro ao iniciar câmera: ", err));
+
+        // Função executada ao ler um QR Code
+        function onQrCodeSuccess(decodedText) {
+            // Limpa espaços e garante formato esperado (Ex: "HD_0001")
+            const detectedCode = decodedText.trim();
+            
+            // Evita disparar repetidamente se for o mesmo HD já detectado
+            if (detectedCode === currentHdCode) return;
+            
+            currentHdCode = detectedCode;
+            
+            // Exibe a barra amarela com o código
+            document.getElementById("hd-code-label").innerText = currentHdCode;
+            document.getElementById("yellow-bar").classList.add("show");
+            
+            // Pré-carrega os dados do JSON em segundo plano
+            fetchHdData(currentHdCode);
+        }
+
+        // Busca os metadados do arquivo JSON correspondente
+        function fetchHdData(hdCode) {
+            const jsonFile = `${hdCode}_step3.json`;
+            
+            fetch(jsonFile)
+                .then(response => {
+                    if (!response.ok) throw new Error("JSON não encontrado");
+                    return response.json();
+                })
+                .then(data => {
+                    // Extrai as chaves principais (os nomes dos projetos no seu JSON)
+                    const projetos = Object.keys(data);
+                    document.getElementById("modal-projects").innerText = projetos.join(", ");
+                })
+                .catch(err => {
+                    console.warn(err);
+                    document.getElementById("modal-projects").innerText = "Estrutura mapeada, metadados resumidos indisponíveis.";
+                });
+
+            // Atualiza o link do botão Explorar dinamicamente
+            document.getElementById("explore-link").href = `${hdCode}.html`;
+            document.getElementById("modal-title").innerText = hdCode;
+        }
+
+        function openPreview() {
+            document.getElementById("preview-modal").classList.add("open");
+            document.getElementById("overlay").style.display = "block";
+        }
+
+        function closePreview() {
+            document.getElementById("preview-modal").classList.remove("open");
+            document.getElementById("yellow-bar").classList.remove("show");
+            document.getElementById("overlay").style.display = "none";
+            currentHdCode = ""; // Reseta para permitir escanear novamente
+        }
+    </script>
 </body>
 </html>
