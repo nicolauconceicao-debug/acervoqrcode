@@ -84,6 +84,40 @@
             display: none !important;
         }
 
+
+/* Indicador visual superior para o usuário saber que dá pra arrastar para baixo */
+        .drag-handle {
+            width: 40px;
+            height: 4px;
+            background: #e0e4e8;
+            border-radius: 2px;
+            margin: -15px auto 15px auto;
+        }
+
+        /* Botão "X" para fechar no estilo minimalista */
+        .close-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 32px;
+            height: 32px;
+            background: #f1f3f5;
+            color: #495057;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+            user-select: none;
+        }
+
+        .close-button:active {
+            background: #e9ecef;
+        }
+
         /* Barra Inferior Amarela Otimizada para Dedos */
         #yellow-bar {
             position: fixed;
@@ -127,22 +161,48 @@
             border-top-right-radius: 20px;
             transition: transform 0.3s ease-out;
             z-index: 20;
-            box-shadow: 0 -8px 30px rgba(0,0,0,0.15);
+            box-shadow: 0 -8px 30px #0056b3(0,0,0,0.15);
         }
 
-        #preview-modal.open {
-            transform: translate(-50%, 0);
+        /* Painel de Pré-visualização */
+        #preview-modal {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translate(-50%, 100%);
+            width: 100%;
+            max-width: 500px;
+            box-sizing: border-box;
+            
+            /* MODIFICAÇÃO AQUI: Padrão Azul e Branco */
+            background: #ffffff; /* Fundo totalmente branco */
+            border-top: 3px solid var(--accent); /* Barrinha azul estilosa no topo */
+            
+            padding: 30px 25px;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            transition: transform 0.3s cubic-bezier(0.1, 0.8, 0.2, 1);
+            z-index: 20;
+            box-shadow: 0 -8px 30px rgba(0,0,0,0.1);
         }
 
-        #preview-modal h3 {
-            border-bottom: 2px solid var(--accent);
-            display: inline-block;
-            padding-bottom: 4px;
-            margin-top: 0;
-            margin-bottom: 20px;
-            font-size: 14px;
-            color: var(--accent);
-            text-transform: uppercase;
+        #preview-modal {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translate(-50%, 100%);
+            width: 100%;
+            max-width: 500px;
+            box-sizing: border-box;
+            background: #ffffff; /* Fundo branco limpo */
+            border-top: 4px solid var(--accent); /* Detalhe azul no topo */
+            padding: 30px 25px 35px 25px;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            transition: transform 0.3s cubic-bezier(0.1, 0.8, 0.2, 1);
+            z-index: 20;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.15);
+            touch-action: none; /* Bloqueia scroll do sistema para priorizar o arrastar do painel */
         }
 
         /* Rótulos e valores idênticos ao seu layout padrão */
@@ -216,6 +276,7 @@
 
     <div id="preview-modal">
         <h3 id="modal-title">HD_0001</h3>
+        <div class="close-button" onclick="closePreview()">×</div>
         
         <div>
             <span class="meta-label">Projetos no Acervo</span>
@@ -307,6 +368,44 @@
             document.getElementById("overlay").style.display = "none";
             currentHdCode = ""; 
         }
+
+        // ==========================================
+        // SISTEMA DE ARRASTAR PARA BAIXO (TOUCH GESTURE)
+        // ==========================================
+        const modal = document.getElementById("preview-modal");
+        let startY = 0;
+        let currentY = 0;
+
+        modal.addEventListener("touchstart", (e) => {
+            startY = e.touches[0].clientY;
+        }, { passive: true });
+
+        modal.addEventListener("touchmove", (e) => {
+            currentY = e.touches[0].clientY;
+            const diffY = currentY - startY;
+
+            // Se o usuário estiver arrastando para baixo, move visualmente o modal acompanhando o dedo
+            if (diffY > 0) {
+                modal.style.transform = `translate(-50%, ${diffY}px)`;
+                modal.style.transition = "none"; // Remove transição para o movimento ficar responsivo ao toque
+            }
+        }, { passive: true });
+
+        modal.addEventListener("touchend", (e) => {
+            const diffY = currentY - startY;
+            modal.style.transition = "transform 0.3s cubic-bezier(0.1, 0.8, 0.2, 1)";
+
+            // Se arrastou mais do que 100 pixels para baixo, fecha o painel
+            if (diffY > 100) {
+                closePreview();
+            } else {
+                // Caso contrário, volta o painel para a posição aberta inicial
+                modal.style.transform = "translate(-50%, 0)";
+            }
+            // Reseta variáveis
+            startY = 0;
+            currentY = 0;
+        });
     </script>
 </body>
 </html>
