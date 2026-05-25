@@ -35,11 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (html5QrCode && html5QrCode.getState() === 2) { // 2 significa SCANNING
             html5QrCode.pause(true);
         }
-    
-        // Liga a borda amarela na tela
-        const reticulo = document.getElementById('reticulo-foco');
-        if (reticulo) reticulo.classList.add('detected');
-    
+        
         abrirPainel(idLimpo);
         if (navigator.vibrate) navigator.vibrate(60);
     };
