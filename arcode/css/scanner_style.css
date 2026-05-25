@@ -52,11 +52,72 @@ body, html {
     pointer-events: none; 
     z-index: 5;
 }
+
+/* O quadro do alvo (Centro transparente, bordas escuras) */
+.scan-box {
+    position: relative;
+    width: 250px; 
+    height: 250px; 
+    border-radius: 20px;
+    box-shadow: 0 0 0 4000px rgba(0,0,0,0.65); /* Máscara escura nativa */
+}
+
+/* Construção dos Cantos Luminosos (Estilo Samsung/Apple) */
+.corner {
+    position: absolute;
+    width: 40px; 
+    height: 40px;
+    border: 4px solid #ffcc00; /* Mude para #3b82f6 se quiser o azul Samsung */
+}
+.top-left { 
+    top: -2px; left: -2px; 
+    border-right: none; border-bottom: none; 
+    border-top-left-radius: 20px; 
+}
+.top-right { 
+    top: -2px; right: -2px; 
+    border-left: none; border-bottom: none; 
+    border-top-right-radius: 20px; 
+}
+.bottom-left { 
+    bottom: -2px; left: -2px; 
+    border-right: none; border-top: none; 
+    border-bottom-left-radius: 20px; 
+}
+.bottom-right { 
+    bottom: -2px; right: -2px; 
+    border-left: none; border-top: none; 
+    border-bottom-right-radius: 20px; 
+}
+
+/* Linha de Laser Animada */
+.scan-line {
+    position: absolute;
+    top: 0; 
+    left: 0;
+    width: 100%; 
+    height: 2px;
+    background: #ffcc00; /* Cor do Laser */
+    box-shadow: 0 0 15px #ffcc00, 0 0 5px #ffcc00; /* Efeito Glow/Neon */
+    animation: scanning 2.5s infinite ease-in-out;
+}
+
+/* Animação do laser subindo e descendo */
+@keyframes scanning {
+    0% { top: 10px; opacity: 0; }
+    10% { opacity: 1; }
+    50% { top: calc(100% - 10px); }
+    90% { opacity: 1; }
+    100% { top: 10px; opacity: 0; }
+}
+
+/* Texto de instrução */
 .status-msg {
-    color: #ffcc00;
-    margin-top: 25px;
-    font-weight: 600;
-    font-size: 14px;
+    color: #ffffff;
+    margin-top: 30px;
+    font-weight: 500;
+    font-size: 15px;
+    letter-spacing: 0.5px;
     text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
 }
 
